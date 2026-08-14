@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "exportedAt": "2026-08-14T20:05:00.560284",
+    "totalRows": 3,
+    "columns": [
+      {
+        "name": "name",
+        "dataType": "VAR_STRING"
+      },
+      {
+        "name": "email",
+        "dataType": "VAR_STRING"
+      },
+      {
+        "name": "city",
+        "dataType": "VAR_STRING"
+      }
+    ],
+    "sql": "SELECT name, email, city FROM users WHERE age > 25",
+    "executionTimeMs": 0
+  },
+  "data": [
+    {
+      "name": "李四",
+      "email": "lisi@example.com",
+      "city": "上海"
+    },
+    {
+      "name": "王五",
+      "email": "wangwu@example.com",
+      "city": "深圳"
+    },
+    {
+      "name": "赵六",
+      "email": "zhaoliu@example.com",
+      "city": "广州"
+    }
+  ]
+}

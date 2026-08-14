@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "exportedAt": "2026-08-14T20:13:26.084781",
+    "totalRows": 5,
+    "columns": [
+      {
+        "name": "id",
+        "dataType": "LONG"
+      },
+      {
+        "name": "name",
+        "dataType": "VAR_STRING"
+      },
+      {
+        "name": "email",
+        "dataType": "VAR_STRING"
+      },
+      {
+        "name": "age",
+        "dataType": "LONG"
+      },
+      {
+        "name": "city",
+        "dataType": "VAR_STRING"
+      },
+      {
+        "name": "created_at",
+        "dataType": "TIMESTAMP"
+      },
+      {
+        "name": "updated_at",
+        "dataType": "TIMESTAMP"
+      }
+    ],
+    "sql": "SELECT * FROM users",
+    "executionTimeMs": 2
+  },
+  "data": [
+    {
+      "id": 1,
+      "name": "张三",
+      "email": "zhangsan@example.com",
+      "age": 25,
+      "city": "北京",
+      "created_at": "2026-08-14T20:02:46",
+      "updated_at": "2026-08-14T20:02:46"
+    },
+    {
+      "id": 2,
+      "name": "李四",
+      "email": "lisi@example.com",
+      "age": 30,
+      "city": "上海",
+      "created_at": "2026-08-14T20:02:46",
+      "updated_at": "2026-08-14T20:02:46"
+    },
+    {
+      "id": 3,
+      "name": "王五",
+      "email": "wangwu@example.com",
+      "age": 28,
+      "city": "深圳",
+      "created_at": "2026-08-14T20:02:46",
+      "updated_at": "2026-08-14T20:02:46"
+    },
+    {
+      "id": 4,
+      "name": "赵六",
+      "email": "zhaoliu@example.com",
+      "age": 35,
+      "city": "广州",
+      "created_at": "2026-08-14T20:02:46",
+      "updated_at": "2026-08-14T20:02:46"
+    },
+    {
+      "id": 5,
+      "name": "孙七",
+      "email": "sunqi@example.com",
+      "age": 22,
+      "city": "杭州",
+      "created_at": "2026-08-14T20:02:46",
+      "updated_at": "2026-08-14T20:02:46"
+    }
+  ]
+}

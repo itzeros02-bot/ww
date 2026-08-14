@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "exportedAt": "2026-08-14T20:24:13.009633",
+    "totalRows": 5,
+    "columns": [
+      {
+        "name": "city",
+        "dataType": "VAR_STRING"
+      },
+      {
+        "name": "user_count",
+        "dataType": "LONGLONG"
+      }
+    ],
+    "sql": "SELECT city, COUNT(*) as user_count FROM users GROUP BY city",
+    "executionTimeMs": 1
+  },
+  "data": [
+    {
+      "city": "北京",
+      "user_count": 1
+    },
+    {
+      "city": "上海",
+      "user_count": 1
+    },
+    {
+      "city": "深圳",
+      "user_count": 1
+    },
+    {
+      "city": "广州",
+      "user_count": 1
+    },
+    {
+      "city": "杭州",
+      "user_count": 1
+    }
+  ]
+}
