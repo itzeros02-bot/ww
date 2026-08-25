@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库查询工具 - Database Query Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif; background: #F4EFEA; color: #383838; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .header { background: #6FC2FF; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+
+        /* Cards */
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { color: #6FC2FF; margin-bottom: 15px; border-bottom: 2px solid #F4EFEA; padding-bottom: 10px; }
+
+        /* API Test Section */
+        .api-section { margin-bottom: 30px; }
+        .api-url { background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; margin-bottom: 10px; }
+
+        /* Buttons */
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 4px; cursor: pointer; border: none; font-size: 14px; margin-right: 10px; margin-bottom: 10px; }
+        .btn-primary { background: #6FC2FF; color: white; }
+        .btn-success { background: #16AA98; color: white; }
+        .btn-warning { background: #FFDE00; color: #383838; }
+        .btn:hover { opacity: 0.9; }
+
+        /* Status indicators */
+        .status { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status.online { background: #16AA98; }
+        .status.offline { background: #FF7169; }
+
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+
+        /* Results */
+        .result-box { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 15px; min-height: 100px; }
+        .result-box pre { white-space: pre-wrap; word-wrap: break-word; }
+
+        /* Grid layout */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+
+        /* Export section */
+        .export-options { display: flex; gap: 10px; margin-top: 10px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        /* Loading */
+        .loading { text-align: center; padding: 20px; color: #6FC2FF; }
+
+        /* Error */
+        .error { background: #FF7169; color: white; padding: 10px; border-radius: 4px; margin: 10px 0; }
+
+        /* Success */
+        .success { background: #16AA98; color: white; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🗄️ 数据库查询工具</h1>
+            <p>智能数据库查询工具 - 支持查询执行和结果导出</p>
+            <p><span class="status online"></span>后端服务运行中</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h2>🚀 快速操作</h2>
+            <div class="grid">
+                <div>
+                    <h3>API 文档</h3>
+                    <p style="margin: 10px 0; color: #666;">查看完整的 API 文档和测试界面</p>
+                    <button class="btn btn-primary" onclick="window.open('http://localhost:8000/docs', '_blank')">打开 Swagger UI</button>
+                </div>
+                <div>
+                    <h3>健康检查</h3>
+                    <p style="margin: 10px 0; color: #666;">检查后端服务状态</p>
+                    <button class="btn btn-success" onclick="checkHealth()">检查状态</button>
+                </div>
+                <div>
+                    <h3>导出功能</h3>
+                    <p style="margin: 10px 0; color: #666;">测试新增的数据导出功能</p>
+                    <button class="btn btn-warning" onclick="testExport()">测试导出</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Connection -->
+        <div class="card">
+            <h2>🔗 数据库连接管理</h2>
+            <div class="form-group">
+                <label>数据库连接名称</label>
+                <input type="text" id="dbName" placeholder="例如: mydb" value="testdb">
+            </div>
+            <div class="form-group">
+                <label>数据库 URL</label>
+                <input type="text" id="dbUrl" placeholder="postgresql://user:password@localhost:5432/database" value="postgresql://postgres:postgres@localhost:5432/testdb">
+            </div>
+            <button class="btn btn-primary" onclick="createDatabase()">创建/更新数据库连接</button>
+            <button class="btn btn-success" onclick="listDatabases()">查看所有数据库</button>
+            <div id="dbResult" class="result-box"></div>
+        </div>
+
+        <!-- Query Execution -->
+        <div class="card">
+            <h2>⚡ SQL 查询执行</h2>
+            <div class="form-group">
+                <label>选择数据库</label>
+                <select id="queryDbName">
+                    <option value="testdb">testdb</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>SQL 查询语句</label>
+                <textarea id="sqlQuery" rows="4" placeholder="SELECT * FROM users LIMIT 10">SELECT * FROM users LIMIT 10</textarea>
+            </div>
+            <div class="export-options">
+                <button class="btn btn-primary" onclick="executeQuery()">执行查询</button>
+                <button class="btn btn-warning" onclick="queryAndExport()">查询并导出</button>
+                <select id="exportFormat">
+                    <option value="csv">CSV 格式</option>
+                    <option value="json">JSON 格式</option>
+                </select>
+            </div>
+            <div id="queryResult" class="result-box"></div>
+        </div>
+
+        <!-- Export Files -->
+        <div class="card">
+            <h2>📁 导出文件管理</h2>
+            <button class="btn btn-primary" onclick="listExportFiles()">查看导出文件</button>
+            <button class="btn btn-success" onclick="window.open('http://localhost:8000/api/v1/exports/files', '_blank')">在浏览器中查看</button>
+            <div id="exportFilesResult" class="result-box"></div>
+        </div>
+
+        <!-- Natural Language Query -->
+        <div class="card">
+            <h2>🤖 自然语言查询</h2>
+            <div class="form-group">
+                <label>选择数据库</label>
+                <select id="nlDbName">
+                    <option value="testdb">testdb</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>用自然语言描述查询</label>
+                <textarea id="nlQuery" rows="3" placeholder="显示所有用户的姓名和邮箱">显示所有用户的姓名和邮箱</textarea>
+            </div>
+            <button class="btn btn-primary" onclick="naturalLanguageQuery()">生成并执行 SQL</button>
+            <div id="nlResult" class="result-box"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        // Utility function for API calls
+        async function apiCall(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                return await response.json();
+            } catch (error) {
+                throw new Error(`API调用失败: ${error.message}`);
+            }
+        }
+
+        // Display results
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            if (isError) {
+                element.innerHTML = `<div class="error">错误: ${JSON.stringify(data, null, 2)}</div>`;
+            } else {
+                element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        }
+
+        // Health check
+        async function checkHealth() {
+            try {
+                const result = await apiCall('http://localhost:8000/health');
+                displayResult('dbResult', result);
+                displayResult('dbResult', `<div class="success">✅ 服务状态: ${result.status}, 版本: ${result.version}</div>`);
+            } catch (error) {
+                displayResult('dbResult', error.message, true);
+            }
+        }
+
+        // Create database connection
+        async function createDatabase() {
+            const name = document.getElementById('dbName').value;
+            const url = document.getElementById('dbUrl').value;
+
+            try {
+                const result = await apiCall(`${API_BASE}/dbs/${name}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ url })
+                });
+                displayResult('dbResult', result);
+            } catch (error) {
+                displayResult('dbResult', error.message, true);
+            }
+        }
+
+        // List databases
+        async function listDatabases() {
+            try {
+                const result = await apiCall(`${API_BASE}/dbs`);
+                displayResult('dbResult', result);
+            } catch (error) {
+                displayResult('dbResult', error.message, true);
+            }
+        }
+
+        // Execute query
+        async function executeQuery() {
+            const dbName = document.getElementById('queryDbName').value;
+            const sql = document.getElementById('sqlQuery').value;
+
+            try {
+                const result = await apiCall(`${API_BASE}/dbs/${dbName}/query`, {
+                    method: 'POST',
+                    body: JSON.stringify({ sql })
+                });
+
+                let html = `<div class="success">✅ 查询成功! 返回 ${result.rowCount} 行</div>`;
+                html += `<div style="margin-top:10px;"><strong>列:</strong> ${result.columns.map(c => c.name).join(', ')}</div>`;
+                html += `<div style="margin-top:10px;"><strong>前5行数据:</strong></div>`;
+                html += `<pre>${JSON.stringify(result.rows.slice(0, 5), null, 2)}</pre>`;
+
+                if (result.rows.length > 5) {
+                    html += `<div style="margin-top:10px;">... 还有 ${result.rows.length - 5} 行</div>`;
+                }
+
+                document.getElementById('queryResult').innerHTML = html;
+            } catch (error) {
+                displayResult('queryResult', error.message, true);
+            }
+        }
+
+        // Query and export
+        async function queryAndExport() {
+            const dbName = document.getElementById('queryDbName').value;
+            const sql = document.getElementById('sqlQuery').value;
+            const format = document.getElementById('exportFormat').value;
+
+            try {
+                const result = await apiCall(`${API_BASE}/dbs/${dbName}/query-and-export`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        sql,
+                        exportFormat: format
+                    })
+                });
+
+                let html = `<div class="success">✅ 查询并导出成功!</div>`;
+                html += `<div style="margin-top:10px;"><strong>文件:</strong> ${result.filepath}</div>`;
+                html += `<div><strong>格式:</strong> ${result.format}</div>`;
+                html += `<div><strong>行数:</strong> ${result.rowCount}</div>`;
+                html += `<div style="margin-top:10px;"><a href="http://localhost:8000${result.downloadUrl}" target="_blank" class="btn btn-success">下载文件</a></div>`;
+
+                document.getElementById('queryResult').innerHTML = html;
+            } catch (error) {
+                displayResult('queryResult', error.message, true);
+            }
+        }
+
+        // List export files
+        async function listExportFiles() {
+            try {
+                const result = await apiCall(`${API_BASE}/exports/files`);
+
+                let html = `<div>找到 ${result.totalFiles} 个导出文件:</div>`;
+                if (result.files.length > 0) {
+                    html += `<ul style="margin-top:10px;">`;
+                    result.files.forEach(file => {
+                        html += `<li style="margin:5px 0;">
+                            <strong>${file.filename}</strong> (${(file.size/1024).toFixed(2)} KB)
+                            <a href="http://localhost:8000/api/v1/exports/download/${file.filename}" target="_blank" style="margin-left:10px;">下载</a>
+                        </li>`;
+                    });
+                    html += `</ul>`;
+                }
+
+                document.getElementById('exportFilesResult').innerHTML = html;
+            } catch (error) {
+                displayResult('exportFilesResult', error.message, true);
+            }
+        }
+
+        // Natural language query
+        async function naturalLanguageQuery() {
+            const dbName = document.getElementById('nlDbName').value;
+            const prompt = document.getElementById('nlQuery').value;
+
+            try {
+                const result = await apiCall(`${API_BASE}/dbs/${dbName}/query/natural`, {
+                    method: 'POST',
+                    body: JSON.stringify({ prompt })
+                });
+
+                let html = `<div class="success">✅ 生成的SQL:</div>`;
+                html += `<pre style="margin:10px 0;">${result.sql}</pre>`;
+                html += `<div><strong>说明:</strong> ${result.explanation}</div>`;
+                html += `<div style="margin-top:10px;"><button class="btn btn-primary" onclick="executeGeneratedQuery('${dbName}', '${result.sql.replace(/'/g, "\\'")}')">执行此查询</button></div>`;
+
+                document.getElementById('nlResult').innerHTML = html;
+            } catch (error) {
+                displayResult('nlResult', error.message, true);
+            }
+        }
+
+        // Execute generated query
+        async function executeGeneratedQuery(dbName, sql) {
+            try {
+                const result = await apiCall(`${API_BASE}/dbs/${dbName}/query`, {
+                    method: 'POST',
+                    body: JSON.stringify({ sql })
+                });
+
+                let html = `<div class="success">✅ 查询成功! 返回 ${result.rowCount} 行</div>`;
+                html += `<pre>${JSON.stringify(result.rows.slice(0, 5), null, 2)}</pre>`;
+
+                document.getElementById('nlResult').innerHTML += html;
+            } catch (error) {
+                document.getElementById('nlResult').innerHTML += `<div class="error">执行失败: ${error.message}</div>`;
+            }
+        }
+
+        // Test export functionality
+        function testExport() {
+            window.open('http://localhost:8000/docs', '_blank');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Database Query Tool loaded successfully!');
+        });
+    </script>
+</body>
+</html>
