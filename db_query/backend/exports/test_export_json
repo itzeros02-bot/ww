@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "exportedAt": "2026-08-14T18:06:13.214338",
+    "totalRows": 2,
+    "columns": [
+      {
+        "name": "id",
+        "dataType": "integer"
+      },
+      {
+        "name": "name",
+        "dataType": "varchar"
+      },
+      {
+        "name": "email",
+        "dataType": "varchar"
+      }
+    ],
+    "sql": "SELECT * FROM users",
+    "executionTimeMs": 123
+  },
+  "data": [
+    {
+      "id": 1,
+      "name": "??",
+      "email": "zhangsan@example.com"
+    },
+    {
+      "id": 2,
+      "name": "??",
+      "email": "lisi@example.com"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Query Tool - Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F4EFEA;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border: 2px solid #000;
+            border-radius: 4px;
+            max-width: 600px;
+        }
+        h1 {
+            color: #383838;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #6FC2FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 2px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5eb0ee;
+        }
+        .console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Database Query Tool</h1>
+        <div id="status"></div>
+
+        <div style="margin-top: 20px;">
+            <button onclick="testBackend()">Test Backend API</button>
+            <button onclick="checkPorts()">Check Ports</button>
+            <button onclick="clearStatus()">Clear Status</button>
+        </div>
+
+        <div id="console" class="console" style="display: none;"></div>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const consoleDiv = document.getElementById('console');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            consoleDiv.innerHTML += `[${timestamp}] [${type.toUpperCase()}] ${message}<br>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        function showStatus(message, type) {
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            log(message, type);
+        }
+
+        function clearStatus() {
+            statusDiv.innerHTML = '';
+            consoleDiv.innerHTML = '';
+            consoleDiv.style.display = 'none';
+        }
+
+        async function testBackend() {
+            clearStatus();
+            consoleDiv.style.display = 'block';
+            showStatus('Testing backend connection...', 'info');
+
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus(`✅ Backend is running! Status: ${data.status}, Version: ${data.version}`, 'success');
+                } else {
+                    showStatus(`❌ Backend responded with status: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Cannot connect to backend: ${error.message}`, 'error');
+                log('Make sure the backend server is running on http://localhost:8000', 'error');
+            }
+        }
+
+        async function checkPorts() {
+            clearStatus();
+            consoleDiv.style.display = 'block';
+            log('Checking common ports...', 'info');
+
+            const ports = [5173, 3000, 8080, 8000];
+            for (const port of ports) {
+                try {
+                    const response = await fetch(`http://localhost:${port}/`, { method: 'HEAD', mode: 'no-cors' });
+                    log(`✅ Port ${port}: Service detected`, 'success');
+                } catch (error) {
+                    log(`❌ Port ${port}: No service detected`, 'error');
+                }
+            }
+        }
+
+        // Auto-test on load
+        window.onload = function() {
+            consoleDiv.style.display = 'block';
+            log('Page loaded successfully', 'success');
+            log('Backend server should be running on http://localhost:8000', 'info');
+            log('Click "Test Backend API" to verify connection', 'info');
+            log('If this test page works but the main app is blank, check browser console for errors', 'info');
+        };
+    </script>
+</body>
+</html>
